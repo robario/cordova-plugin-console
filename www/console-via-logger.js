@@ -22,6 +22,7 @@
 //------------------------------------------------------------------------------
 
 var logger = require("./logger");
+var platform = require("cordova/platform");
 
 //------------------------------------------------------------------------------
 // object that we're exporting
@@ -169,6 +170,11 @@ console.table = function(data, columns) {
 function wrappedOrigCall(orgFunc, newFunc) {
     return function() {
         var args = [].slice.call(arguments);
+        if (platform.id == "android") {
+            args = [args.map(function (v) {
+                        return typeof v == "string" || v instanceof String ? v : JSON.stringify(v);
+                    }).join(" ")];
+        }
         try { orgFunc.apply(WinConsole, args); } catch (e) {}
         try { newFunc.apply(console,    args); } catch (e) {}
     };
