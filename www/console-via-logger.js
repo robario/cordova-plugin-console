@@ -168,13 +168,14 @@ console.table = function(data, columns) {
 // return a new function that calls both functions passed as args
 //------------------------------------------------------------------------------
 function wrappedOrigCall(orgFunc, newFunc) {
-    return function() {
+    return (platform.id == "android") ? function() {
+        var arg = [].slice.call(arguments).map(function (v) {
+            return typeof v == "string" || v instanceof String ? v : JSON.stringify(v);
+        }).join(" ");
+        try { orgFunc.call(WinConsole, arg); } catch (e) {}
+        try { newFunc.call(console,    arg); } catch (e) {}
+    } : function() {
         var args = [].slice.call(arguments);
-        if (platform.id == "android") {
-            args = [args.map(function (v) {
-                        return typeof v == "string" || v instanceof String ? v : JSON.stringify(v);
-                    }).join(" ")];
-        }
         try { orgFunc.apply(WinConsole, args); } catch (e) {}
         try { newFunc.apply(console,    args); } catch (e) {}
     };
